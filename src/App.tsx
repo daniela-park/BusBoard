@@ -33,24 +33,21 @@ function App() {
     setPostCode(undefined)
     setBusInfo(undefined)
     setError(false)
-    
+
     const formData = new FormData(event.target as HTMLFormElement)
     const validPostCode = formData.get("validPostCode")
 
     const postCodeUrl = `https://api.postcodes.io/postcodes/${validPostCode}`
-    const fetchPostCodeApi = async () => {let postCodeApi = await fetch(postCodeUrl); return postCodeApi.json();};
+    const fetchPostCodeApi = async () => { let postCodeApi = await fetch(postCodeUrl); return postCodeApi.json(); };
     const postCodeInfo = await fetchPostCodeApi();
     const postCodeStatus = postCodeInfo.status
-    while (postCodeStatus != 200)
-    {
-      try
-      {
+    while (postCodeStatus != 200) {
+      try {
         if (postCodeStatus != 200) {
           throw 'Invalid postcode';
         }
       }
-      catch (error)
-      {
+      catch (error) {
         console.log('Invalid postcode. Please try again.')
       }
     }
@@ -73,38 +70,51 @@ function App() {
     }
   }
 
+  const buses = []
+  if (busInfo) {
+    for (let i = 0; i < busInfo.stopPoints[0].lineModeGroups[0].lineIdentifier.length; i++) {
+      buses.push({
+        id: i,
+        busNumber: busInfo.stopPoints[0].lineModeGroups[0].lineIdentifier[i]
+      })
+    }
+  }
+
   return (
     <main>
       <div className='backgroundImg'>
-      <h2>Find nearby buses close to you!</h2>
-      <form onSubmit={handleSubmit}>
-        <label>
-          <h2>Enter a postcode:</h2>
-          <br />
-          <input type="text" name="validPostCode" />
-        </label>
-        <br />
-        <br />
-        <button type="submit">Show buses!</button>
-      </form>
+        <h2>Find nearby buses close to you!</h2>
+        <form onSubmit={handleSubmit}>
+          <label>
+            <h2>Enter a postcode:</h2>
+            <br />
+            <input type="text" name="validPostCode" />
+          </label>
+            <br />
+            <br />
+          <button type="submit">Show buses!</button>
+        </form>
 
-      {busInfo &&
-      <div>
-        <h2>The buses nearby are:</h2>
-          <li>{busInfo.stopPoints[0].lineModeGroups[0].lineIdentifier[0]}</li>
-          <li>{busInfo.stopPoints[0].lineModeGroups[0].lineIdentifier[1]}</li>
-          <li>{busInfo.stopPoints[0].lineModeGroups[0].lineIdentifier[2]}</li>
-          <li>{busInfo.stopPoints[0].lineModeGroups[0].lineIdentifier[3]}</li>
-        </div>
-      }
+        {busInfo &&
+          <div>
+            <h2>The buses nearby are:</h2>
+            <div>
+              {buses.map((bus) => (
+                <div key={bus.id}>
+                  <li>{bus.busNumber}</li>
+                </div>
+              ))}
+            </div>
+          </div>
+        }
 
-      {loading &&
-      <p>Loading...</p>
-      }
+            {loading &&
+              <p>Loading...</p>
+            }
 
-      {error &&
-      <p>The postcode could not be found!</p>
-      }
+            {error &&
+              <p>The postcode could not be found!</p>
+            }
       </div>
     </main>
   )
