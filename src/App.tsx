@@ -1,26 +1,71 @@
 import { useState } from 'react'
 import './App.css'
 
+interface PostCode {
+  status: number
+  result: {
+    latitude: string
+    longitude: string
+  }
+
+}
+
 interface BusInfo {
-  postcode: string
-  nearbyBuses: string
+  stopPoints: [
+    {
+      lineModeGroups: [
+        {
+          lineIdentifier: [string, string, string, string, string]
+        }
+      ]
+    }
+  ]
 }
 
 function App() {
+  const [postCode, setPostCode] = useState<PostCode>()
   const [busInfo, setBusInfo] = useState<BusInfo>()
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<boolean>(false)
 
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (event) => {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault()
+    setPostCode(undefined)
     setBusInfo(undefined)
     setError(false)
-
+    
     const formData = new FormData(event.target as HTMLFormElement)
     const validPostCode = formData.get("validPostCode")
+
+    const postCodeUrl = `https://api.postcodes.io/postcodes/${validPostCode}`
+    const fetchPostCodeApi = async () => {let postCodeApi = await fetch(postCodeUrl); return postCodeApi.json();};
+    const postCodeInfo = await fetchPostCodeApi();
+    const postCodeStatus = postCodeInfo.status
+    while (postCodeStatus != 200)
+    {
+      try
+      {
+        if (postCodeStatus != 200) {
+          throw 'Invalid postcode';
+        }
+      }
+      catch (error)
+      {
+        console.log('Invalid postcode. Please try again.')
+      }
+    }
+
+    const fetchLat = async () => { let lat = await fetch(postCodeUrl); return lat.json(); };
+    let lat = await fetchLat();
+    lat = lat.result.latitude
+
+    const fetchLon = async () => { let lon = await fetch(postCodeUrl); return lon.json(); };
+    let lon = await fetchLon();
+    lon = lon.result.longitude
+
     if (validPostCode) {
       setLoading(true)
-      fetch(`https://api.postcodes.io/postcodes/${validPostCode}`)
+      fetch(`https://api.tfl.gov.uk/StopPoint/?lat=${lat}&lon=${lon}&stopTypes=NaptanPublicBusCoachTram`)
         .then((response) => response.json())
         .then((data) => setBusInfo(data))
         .catch(() => setError(true))
@@ -45,8 +90,11 @@ function App() {
 
       {busInfo &&
       <div>
-        <h2>The buses nearby {busInfo.postcode} are:</h2>
-        <h2>{busInfo.nearbyBuses}</h2>
+        <h2>The buses nearby are:</h2>
+          <li>{busInfo.stopPoints[0].lineModeGroups[0].lineIdentifier[0]}</li>
+          <li>{busInfo.stopPoints[0].lineModeGroups[0].lineIdentifier[1]}</li>
+          <li>{busInfo.stopPoints[0].lineModeGroups[0].lineIdentifier[2]}</li>
+          <li>{busInfo.stopPoints[0].lineModeGroups[0].lineIdentifier[3]}</li>
         </div>
       }
 
