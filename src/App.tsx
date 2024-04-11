@@ -1,14 +1,13 @@
 import { useState } from 'react'
 import './App.css'
 
-interface PostCode {
-  status: number
-  result: {
-    latitude: string
-    longitude: string
-  }
-
-}
+// interface PostCode {
+//   status: number
+//   result: {
+//     latitude: string
+//     longitude: string
+//   }
+// }
 
 interface BusInfo {
   stopPoints: [
@@ -23,14 +22,14 @@ interface BusInfo {
 }
 
 function App() {
-  const [postCode, setPostCode] = useState<PostCode>()
+  // const [postCode, setPostCode] = useState<PostCode>()
   const [busInfo, setBusInfo] = useState<BusInfo>()
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<boolean>(false)
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault()
-    setPostCode(undefined)
+    // setPostCode(undefined)
     setBusInfo(undefined)
     setError(false)
 
@@ -90,8 +89,8 @@ function App() {
             <br />
             <input type="text" name="validPostCode" />
           </label>
-            <br />
-            <br />
+          <br />
+          <br />
           <button type="submit">Show buses!</button>
         </form>
 
@@ -108,13 +107,13 @@ function App() {
           </div>
         }
 
-            {loading &&
-              <p>Loading...</p>
-            }
+        {loading &&
+          <p>Loading...</p>
+        }
 
-            {error &&
-              <p>The postcode could not be found!</p>
-            }
+        {error &&
+          <p>The postcode could not be found!</p>
+        }
       </div>
     </main>
   )
