@@ -81,7 +81,7 @@ function App() {
 
   return (
     <main>
-      <div className='backgroundImg'>
+      <div className='container'>
         <h2>Find nearby buses close to you!</h2>
         <form onSubmit={handleSubmit}>
           <label>
@@ -115,6 +115,10 @@ function App() {
           <p>The postcode could not be found!</p>
         }
       </div>
+
+      <footer>
+        <a href="https://github.com/daniela-park/BusBoard"><button>Bus Board Repository</button></a>
+      </footer>
     </main>
   )
 }
