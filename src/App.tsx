@@ -24,6 +24,7 @@ interface BusInfo {
 function App() {
   // const [postCode, setPostCode] = useState<PostCode>()
   const [busInfo, setBusInfo] = useState<BusInfo>()
+  const [dataEntered, setDataEntered] = useState()
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<boolean>(false)
 
@@ -40,33 +41,38 @@ function App() {
     const fetchPostCodeApi = async () => { let postCodeApi = await fetch(postCodeUrl); return postCodeApi.json(); };
     const postCodeInfo = await fetchPostCodeApi();
     const postCodeStatus = postCodeInfo.status
-    while (postCodeStatus != 200) {
+
+    let maxTries = 1;
+    let triesCounter = 0;
+
+    while (postCodeStatus != 200 && triesCounter < maxTries) {
       try {
         if (postCodeStatus != 200) {
           throw 'Invalid postcode';
         }
       }
       catch (error) {
+        triesCounter =+ 1
         console.log('Invalid postcode. Please try again.')
       }
     }
 
-    const fetchLat = async () => { let lat = await fetch(postCodeUrl); return lat.json(); };
-    let lat = await fetchLat();
-    lat = lat.result.latitude
-
-    const fetchLon = async () => { let lon = await fetch(postCodeUrl); return lon.json(); };
-    let lon = await fetchLon();
-    lon = lon.result.longitude
-
     if (validPostCode) {
+      const fetchLat = async () => { let lat = await fetch(postCodeUrl); return lat.json(); };
+      let lat = await fetchLat();
+      lat = lat.result.latitude
+  
+      const fetchLon = async () => { let lon = await fetch(postCodeUrl); return lon.json(); };
+      let lon = await fetchLon();
+      lon = lon.result.longitude
+
       setLoading(true)
       fetch(`https://api.tfl.gov.uk/StopPoint/?lat=${lat}&lon=${lon}&stopTypes=NaptanPublicBusCoachTram`)
         .then((response) => response.json())
         .then((data) => setBusInfo(data))
         .catch(() => setError(true))
         .finally(() => setLoading(false))
-    }
+    } 
   }
 
   const buses = []
@@ -94,7 +100,7 @@ function App() {
           <button type="submit">Show buses!</button>
         </form>
 
-        {busInfo &&
+        {busInfo && dataEntered &&
           <div>
             <h2>The buses nearby are:</h2>
             <div>
@@ -104,6 +110,13 @@ function App() {
                 </div>
               ))}
             </div>
+          </div>
+        }
+
+        {!busInfo && !dataEntered &&
+          <div>
+            {/* <p>{dataEntered ? setDataEntered : "Invalid postcode"}</p> */}
+            {/* <p>Invalid postcode. Try again!</p> */}
           </div>
         }
 
